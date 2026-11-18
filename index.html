@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <title>Public Message Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: light; --ink:#172033; --muted:#68738a; --line:#e6eaf1; --blue:#4968e8; --bg:#f4f6fb; }
+    * { box-sizing:border-box }
+    body { margin:0; min-height:100vh; background:radial-gradient(ellipse at 10% 0%,#e7edff 0,transparent 36%),var(--bg); color:var(--ink); font-family:"DM Sans",sans-serif; }
+    .wrap { width:min(850px,calc(100% - 32px)); margin:0 auto; padding:54px 0 70px; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:34px; }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .logo { width:46px;height:46px;border-radius:15px;display:grid;place-items:center;color:white;background:linear-gradient(145deg,#6d85ff,#4258d5);box-shadow:0 8px 20px #4968e833;font-size:22px; }
+    h1 { font:800 clamp(24px,4vw,32px)/1.1 "Manrope",sans-serif; margin:0; letter-spacing:-1px; }
+    .sub { color:var(--muted);font-size:14px;margin-top:5px }
+    .live { border:1px solid #ccebd9;background:#effbf4;color:#19834a;border-radius:99px;padding:8px 12px;font-size:12px;font-weight:700;white-space:nowrap; }
+    .live:before { content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#24b36b;margin-right:7px;vertical-align:1px; }
+    .composer,.board { background:#fff;border:1px solid var(--line);border-radius:22px;box-shadow:0 12px 40px #25365c0a; }
+    .composer { padding:24px;margin-bottom:28px; }
+    .section-title { font:700 17px "Manrope",sans-serif;margin:0 0 7px; }
+    .hint { color:var(--muted);font-size:13px;margin:0 0 16px;line-height:1.5; }
+    textarea { width:100%; min-height:125px; resize:vertical; border:1px solid #dfe4ee;border-radius:14px;padding:15px;font:15px/1.55 "DM Sans",sans-serif;color:var(--ink);outline:none;transition:.2s;background:#fbfcff; }
+    textarea:focus { border-color:#8093f5;box-shadow:0 0 0 4px #4968e815;background:#fff; }
+    .compose-bottom { display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:13px; }
+    .counter { color:#8791a4;font-size:12px; }
+    button { font:700 14px "DM Sans",sans-serif;cursor:pointer;border:0; }
+    .save { color:#fff;background:linear-gradient(135deg,#6079f3,#425bdc);padding:12px 19px;border-radius:12px;box-shadow:0 6px 15px #4968e82b; }
+    .save:hover { filter:brightness(1.05);transform:translateY(-1px) }
+    .save:disabled { opacity:.55;cursor:wait;transform:none; }
+    .board { padding:24px; }
+    .board-head { display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px; }
+    .board-head h2 { font:700 18px "Manrope",sans-serif;margin:0; }
+    .count { color:#6c7890;background:#f1f3f8;padding:6px 10px;border-radius:99px;font-size:12px;font-weight:700; }
+    .messages { display:grid;gap:12px; }
+    .message { border:1px solid #e9edf4;border-radius:15px;padding:17px 17px 14px;background:linear-gradient(135deg,#fff,#fcfdff); }
+    .message-text { white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px;line-height:1.65; }
+    .message-foot { display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px;padding-top:11px;border-top:1px solid #f0f2f6; }
+    .date { color:#929bad;font-size:11px; }
+    .delete { color:#bd4350;background:#fff1f2;border:1px solid #ffe0e3;border-radius:9px;padding:7px 10px;font-size:12px; }
+    .delete:hover { background:#ffe4e7; }
+    .empty { text-align:center;padding:36px 12px;color:#7b879b; }
+    .empty-icon { font-size:28px;margin-bottom:10px; }
+    .empty strong { display:block;color:#39445a;margin-bottom:5px; }
+    .status { min-height:20px;margin-top:10px;font-size:13px;color:#bd4350; }
+    footer { text-align:center;color:#98a1b1;font-size:12px;margin-top:22px;line-height:1.6; }
+    @media(max-width:560px) { .wrap{padding-top:30px}.composer,.board{padding:18px;border-radius:18px}header{align-items:flex-start}.live{font-size:11px;padding:7px 9px}.compose-bottom{align-items:flex-end}.save{padding:11px 14px} }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">✎</div>
+        <div><h1>Public Message Board</h1><div class="sub">A shared space for everyone</div></div>
+      </div>
+      <div class="live">Live board</div>
+    </header>
+
+    <section class="composer">
+      <h2 class="section-title">Post a message</h2>
+      <p class="hint">Write something for everyone to see. Your message will stay here until someone deletes it.</p>
+      <form id="message-form">
+        <textarea id="message-input" maxlength="5000" placeholder="Write your message here..." required></textarea>
+        <div class="compose-bottom">
+          <span class="counter" id="counter">0 / 5000</span>
+          <button class="save" id="save-button" type="submit">Publish message&nbsp; →</button>
+        </div>
+        <div class="status" id="status" role="status" aria-live="polite"></div>
+      </form>
+    </section>
+
+    <section class="board">
+      <div class="board-head"><h2>Messages</h2><span class="count" id="message-count">0 posts</span></div>
+      <div class="messages" id="messages">
+        <div class="empty"><div class="empty-icon">💬</div><strong>Loading messages…</strong>Please wait a moment.</div>
+      </div>
+    </section>
+    <footer>Messages are shared publicly with everyone who visits this page.<br>Only post information you are comfortable making public.</footer>
+  </main>
+
+  <script type="module">
+    // 1) Replace the values below with your Firebase project's web app configuration.
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc, deleteDoc, doc,
+      onSnapshot, query, orderBy, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "PASTE_YOUR_API_KEY",
+      authDomain: "PASTE_YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "PASTE_YOUR_PROJECT_ID",
+      storageBucket: "PASTE_YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID",
+      appId: "PASTE_YOUR_APP_ID"
+    };
+
+    const input = document.getElementById("message-input");
+    const form = document.getElementById("message-form");
+    const saveButton = document.getElementById("save-button");
+    const status = document.getElementById("status");
+    const messagesEl = document.getElementById("messages");
+    const countEl = document.getElementById("message-count");
+    const counter = document.getElementById("counter");
+
+    input.addEventListener("input", () => counter.textContent = `${input.value.length} / 5000`);
+
+    function showError(message) {
+      status.textContent = message;
+    }
+    function formatDate(timestamp) {
+      if (!timestamp?.toDate) return "Just now";
+      return timestamp.toDate().toLocaleString(undefined, {
+        dateStyle: "medium", timeStyle: "short"
+      });
+    }
+    function renderMessages(snapshot) {
+      countEl.textContent = `${snapshot.size} ${snapshot.size === 1 ? "post" : "posts"}`;
+      messagesEl.replaceChildren();
+      if (snapshot.empty) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.innerHTML = '<div class="empty-icon">💬</div><strong>No messages yet</strong>Be the first to post something.';
+        messagesEl.append(empty);
+        return;
+      }
+      snapshot.forEach((item) => {
+        const data = item.data();
+        const card = document.createElement("article");
+        card.className = "message";
+        const text = document.createElement("div");
+        text.className = "message-text";
+        text.textContent = data.text || "";
+        const foot = document.createElement("div");
+        foot.className = "message-foot";
+        const date = document.createElement("span");
+        date.className = "date";
+        date.textContent = formatDate(data.createdAt);
+        const del = document.createElement("button");
+        del.className = "delete";
+        del.type = "button";
+        del.textContent = "Delete";
+        del.setAttribute("aria-label", "Delete this message");
+        del.addEventListener("click", async () => {
+          if (!confirm("Delete this message for everyone? This cannot be undone.")) return;
+          del.disabled = true;
+          try {
+            await deleteDoc(doc(db, "messages", item.id));
+          } catch (error) {
+            alert("Could not delete this message. Please try again.");
+            del.disabled = false;
+            console.error(error);
+          }
+        });
+        foot.append(date, del);
+        card.append(text, foot);
+        messagesEl.append(card);
+      });
+    }
+
+    let db;
+    try {
+      if (firebaseConfig.apiKey.startsWith("PASTE_") || firebaseConfig.projectId.startsWith("PASTE_")) {
+        throw new Error("Firebase is not configured yet. Add your Firebase web app settings in index.html.");
+      }
+      const app = initializeApp(firebaseConfig);
+      db = getFirestore(app);
+      const messagesQuery = query(collection(db, "messages"), orderBy("createdAt", "desc"));
+      onSnapshot(messagesQuery, renderMessages, (error) => {
+        console.error(error);
+        messagesEl.innerHTML = '<div class="empty"><strong>Could not load messages</strong>Check your Firebase setup and Firestore security rules.</div>';
+      });
+    } catch (error) {
+      messagesEl.innerHTML = '<div class="empty"><div class="empty-icon">⚙️</div><strong>One-time setup needed</strong>Add your Firebase web app configuration in index.html, then publish the site.</div>';
+      showError(error.message);
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const text = input.value.trim();
+      if (!text) { showError("Please write a message before publishing."); return; }
+      if (!db) { showError("Connect Firebase first by following the setup guide."); return; }
+      saveButton.disabled = true;
+      saveButton.textContent = "Publishing…";
+      showError("");
+      try {
+        await addDoc(collection(db, "messages"), { text, createdAt: serverTimestamp() });
+        input.value = "";
+        counter.textContent = "0 / 5000";
+        showError("Your message is now visible to everyone.");
+        setTimeout(() => { if (status.textContent.startsWith("Your message")) status.textContent = ""; }, 3500);
+      } catch (error) {
+        console.error(error);
+        showError("Could not publish. Check your internet connection and Firestore rules.");
+      } finally {
+        saveButton.disabled = false;
+        saveButton.textContent = "Publish message  →";
+      }
+    });
+  </script>
+</body>
+</html>
